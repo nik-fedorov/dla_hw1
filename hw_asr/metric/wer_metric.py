@@ -25,3 +25,24 @@ class ArgmaxWERMetric(BaseMetric):
                 pred_text = self.text_encoder.decode(log_prob_vec[:length])
             wers.append(calc_wer(target_text, pred_text))
         return sum(wers) / len(wers)
+
+
+class BeamSearchWERMetric(BaseMetric):
+    def __init__(self, text_encoder: BaseTextEncoder, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text_encoder = text_encoder
+
+    def __call__(self, log_probs: Tensor, log_probs_length: Tensor, text: List[str], **kwargs):
+        wers = []
+        probs = log_probs.exp().cpu()
+        lengths = log_probs_length.detach().numpy()
+        for prob_matrix, length, target_text in zip(probs, lengths, text):
+            target_text = BaseTextEncoder.normalize_text(target_text)
+            if hasattr(self.text_encoder, "ctc_beam_search"):
+                beam_search_hypos = self.text_encoder.ctc_beam_search(prob_matrix, length)
+                pred_text = beam_search_hypos[0].text   # take the most probable hypo
+            else:
+                argmax = torch.argmax(prob_matrix, dim=-1)
+                pred_text = self.text_encoder.decode(argmax[:length])
+            wers.append(calc_wer(target_text, pred_text))
+        return sum(wers) / len(wers)
