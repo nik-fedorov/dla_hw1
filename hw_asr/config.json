@@ -112,6 +112,18 @@
       "args": {
         "name": "CER (argmax)"
       }
+    },
+    {
+      "type": "BeamSearchWERMetric",
+      "args": {
+        "name": "WER (beam search)"
+      }
+    },
+    {
+      "type": "BeamSearchCERMetric",
+      "args": {
+        "name": "CER (beam search)"
+      }
     }
   ],
   "lr_scheduler": {
@@ -132,7 +144,7 @@
     "monitor": "min val_loss",
     "early_stop": 100,
     "visualize": "wandb",
-    "wandb_project": "asr_project",
+    "wandb_project": "dla_hw1",
     "len_epoch": 100,
     "grad_norm_clip": 10
   }
