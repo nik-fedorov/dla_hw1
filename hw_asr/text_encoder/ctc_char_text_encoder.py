@@ -25,7 +25,7 @@ class CTCCharTextEncoder(CharTextEncoder):
         res_tokens = []
         for i in range(len(inds)):
             if inds[i] != self.empty_ind and (i == 0 or inds[i - 1] != inds[i]):
-                res_tokens += inds[i]
+                res_tokens.append(inds[i])
         return self.decode(res_tokens)
 
     def ctc_beam_search(self, probs: torch.tensor, probs_length,
