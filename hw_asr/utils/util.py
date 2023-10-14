@@ -35,7 +35,10 @@ def inf_loop(data_loader):
 
 def prepare_device(n_gpu_use):
     """
-    setup GPU device if available. get gpu device indices which are used for DataParallel
+    Setup GPU device if available. Cut desirable number of gpu to all available number of gpu.
+    Get gpu device indices which are used for DataParallel
+    :param n_gpu_use: desirable number of gpu to use
+    :return: device, list(range(final number of gpu))
     """
     n_gpu = torch.cuda.device_count()
     if n_gpu_use > 0 and n_gpu == 0:

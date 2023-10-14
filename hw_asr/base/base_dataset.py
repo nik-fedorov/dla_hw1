@@ -61,6 +61,10 @@ class BaseDataset(Dataset):
         return len(self._index)
 
     def load_audio(self, path):
+        '''
+        Load audio from path, resample it if needed
+        :return: 1st channel of audio (tensor of shape 1xL)
+        '''
         audio_tensor, sr = torchaudio.load(path)
         audio_tensor = audio_tensor[0:1, :]  # remove all channels but the first
         target_sr = self.config_parser["preprocessing"]["sr"]
@@ -69,6 +73,9 @@ class BaseDataset(Dataset):
         return audio_tensor
 
     def process_wave(self, audio_tensor_wave: Tensor):
+        '''
+        :return: augmented audio_tensor_wave, augmented audio_tensor_spec
+        '''
         with torch.no_grad():
             if self.wave_augs is not None:
                 audio_tensor_wave = self.wave_augs(audio_tensor_wave)
@@ -87,6 +94,9 @@ class BaseDataset(Dataset):
     def _filter_records_from_dataset(
             index: list, max_audio_length, max_text_length, limit
     ) -> list:
+        '''
+        Filter records depending on max_audio_length, max_text_length and limit
+        '''
         initial_size = len(index)
         if max_audio_length is not None:
             exceeds_audio_length = np.array([el["audio_len"] for el in index]) >= max_audio_length

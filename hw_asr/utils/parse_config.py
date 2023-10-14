@@ -57,6 +57,11 @@ class ConfigParser:
     def from_args(cls, args, options=""):
         """
         Initialize this class from some cli arguments. Used in train, test.
+        More specifically:
+        - add modifiable params of config to args and parse args
+        - set up CUDA_VISIBLE_DEVICES if needed
+        - create config and update it if fune-tuning
+        - form modifications for modifiable params of config
         """
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)
