@@ -42,7 +42,7 @@ class CTCCharTextEncoder(CharTextEncoder):
         prob_dict = {("", self.EMPTY_TOK): 1.0}  # format: (decoded_prefix, last_char): probability
 
         # recurrently build final prob_dict
-        for i in range(len(probs_length)):
+        for i in range(probs_length):
             prev_prob_dict = prob_dict
             prob_dict = defaultdict(float)
 
