@@ -57,7 +57,7 @@ class CTCCharTextEncoder(CharTextEncoder):
                         else:
                             prob_dict[(prefix + token, token)] += prob * token_prob
 
-                prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True)[:beam_size])
+            prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True)[:beam_size])
 
         # build final hypos
         final_hypos_dict = defaultdict(float)
