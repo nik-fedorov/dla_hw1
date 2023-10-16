@@ -29,7 +29,7 @@ class CTCCharTextEncoder(CharTextEncoder):
         return self.decode(res_tokens)
 
     def ctc_beam_search(self, probs: torch.tensor, probs_length,
-                        beam_size: int = 100) -> List[Hypothesis]:
+                        beam_size: int = 10) -> List[Hypothesis]:
         """
         Performs beam search and returns a list of pairs (hypothesis, hypothesis probability).
         """
