@@ -19,7 +19,7 @@ class WanDBWriter:
             run_id = config["trainer"].get("wandb_run_id_to_resume")
             if config.resume is not None and run_id is not None:
                 wandb.init(
-                    project=config['trainer'].get('wandb_project'),
+                    project=config["trainer"].get("wandb_project"),
                     id=run_id,
                     resume="must",
                     save_code=True
@@ -31,7 +31,7 @@ class WanDBWriter:
                           "Starting new wandb run with training from scratch."
                     logger.warning(msg)
                 wandb.init(
-                    project=config['trainer'].get('wandb_project'),
+                    project=config["trainer"].get("wandb_project"),
                     config=config.config,
                     save_code=True
                 )
