@@ -2,7 +2,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import wandb
 
 
 class WanDBWriter:
@@ -14,13 +13,29 @@ class WanDBWriter:
             import wandb
             wandb.login()
 
-            if config['trainer'].get('wandb_project') is None:
+            if config["trainer"].get("wandb_project") is None:
                 raise ValueError("please specify project name for wandb")
 
-            wandb.init(
-                project=config['trainer'].get('wandb_project'),
-                config=config.config
-            )
+            run_id = config["trainer"].get("wandb_run_id_to_resume")
+            if config.resume is not None and run_id is not None:
+                wandb.init(
+                    project=config['trainer'].get('wandb_project'),
+                    id=run_id,
+                    resume="must",
+                    save_code=True
+                )
+            else:
+                if config.resume is None and run_id is not None:
+                    msg = "WARNING: wandb_run_id_to_resume in config IS SET " \
+                          "but checkpoint to resume training IS NOT SET. " \
+                          "Starting new wandb run with training from scratch."
+                    logger.warning(msg)
+                wandb.init(
+                    project=config['trainer'].get('wandb_project'),
+                    config=config.config,
+                    save_code=True
+                )
+
             self.wandb = wandb
 
         except ImportError:
@@ -85,7 +100,7 @@ class WanDBWriter:
         }, step=self.step)
 
     def add_table(self, table_name, table: pd.DataFrame):
-        self.wandb.log({self._scalar_name(table_name): wandb.Table(dataframe=table)},
+        self.wandb.log({self._scalar_name(table_name): self.wandb.Table(dataframe=table)},
                        step=self.step)
 
     def add_images(self, scalar_name, images):

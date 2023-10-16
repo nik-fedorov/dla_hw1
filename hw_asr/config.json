@@ -125,14 +125,19 @@
   },
   "trainer": {
     "epochs": 50,
+    "len_epoch": 100,
+
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
+
     "monitor": "min val_loss",
     "early_stop": 100,
+
     "visualize": "wandb",
     "wandb_project": "dla_hw1",
-    "len_epoch": 100,
+    "wandb_run_id_to_resume": null,
+
     "grad_norm_clip": 10
   }
 }
