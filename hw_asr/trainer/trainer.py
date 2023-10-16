@@ -114,9 +114,11 @@ class Trainer(BaseTrainer):
                 self.writer.add_scalar(
                     "learning rate", self.lr_scheduler.get_last_lr()[0]
                 )
+                self._log_scalars(self.train_metrics)
                 self._log_predictions(**batch)
                 self._log_spectrogram(batch["spectrogram"])
-                self._log_scalars(self.train_metrics)
+                self._log_audio(batch["audio"])
+
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
                 last_train_metrics = self.train_metrics.result()
@@ -182,6 +184,7 @@ class Trainer(BaseTrainer):
             self._log_scalars(self.evaluation_metrics)
             self._log_predictions(**batch)
             self._log_spectrogram(batch["spectrogram"])
+            self._log_audio(batch["audio"])
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -255,6 +258,10 @@ class Trainer(BaseTrainer):
         spectrogram = random.choice(spectrogram_batch.cpu())
         image = PIL.Image.open(plot_spectrogram_to_buf(spectrogram))
         self.writer.add_image("spectrogram", ToTensor()(image))
+
+    def _log_audio(self, audio_batch):
+        audio = random.choice(audio_batch)
+        self.writer.add_audio("audio", audio)
 
     @torch.no_grad()
     def get_grad_norm(self, norm_type=2):
