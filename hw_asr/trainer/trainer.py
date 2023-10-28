@@ -117,7 +117,7 @@ class Trainer(BaseTrainer):
                 self._log_scalars(self.train_metrics)
                 self._log_predictions(**batch)
                 self._log_spectrogram(batch["spectrogram"])
-                self._log_audio(batch["audio"])
+                self._log_audio(batch["audio"], self.config["preprocessing"]["sr"])
 
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
@@ -184,7 +184,7 @@ class Trainer(BaseTrainer):
             self._log_scalars(self.evaluation_metrics)
             self._log_predictions(**batch)
             self._log_spectrogram(batch["spectrogram"])
-            self._log_audio(batch["audio"])
+            self._log_audio(batch["audio"], self.config["preprocessing"]["sr"])
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -226,27 +226,27 @@ class Trainer(BaseTrainer):
         argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
 
         # make beam search predictions
-        probs = log_probs.exp().cpu()
-        beam_search_texts = []
-        for prob_matrix, length in zip(probs, lengths):
-            hypos = self.text_encoder.ctc_beam_search(prob_matrix, length)
-            texts_to_log = [hypo.text for hypo in hypos[:beam_search_hypos_to_log]]
-            beam_search_texts.append(texts_to_log)
+        # probs = log_probs.exp().cpu()
+        # beam_search_texts = []
+        # for prob_matrix, length in zip(probs, lengths):
+        #     hypos = self.text_encoder.ctc_beam_search(prob_matrix, length)
+        #     texts_to_log = [hypo.text for hypo in hypos[:beam_search_hypos_to_log]]
+        #     beam_search_texts.append(texts_to_log)
 
         # randomly shuffle the data
-        tuples = list(zip(argmax_texts, beam_search_texts, text, argmax_texts_raw, audio_path))
+        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
         shuffle(tuples)
 
         # log prediction examples
         rows = {}
-        for pred, beam_search_preds, target, raw_pred, audio_path in tuples[:examples_to_log]:
+        for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
             target = BaseTextEncoder.normalize_text(target)
             argmax_wer = calc_wer(target, pred) * 100
             argmax_cer = calc_cer(target, pred) * 100
 
             rows[Path(audio_path).name] = {
                 "target": target,
-                "beam search predictions": beam_search_preds,
+                # "beam search predictions": beam_search_preds,
                 "argmax raw prediction": raw_pred,
                 "argmax predictions": pred,
                 "argmax wer": argmax_wer,
@@ -259,9 +259,9 @@ class Trainer(BaseTrainer):
         image = PIL.Image.open(plot_spectrogram_to_buf(spectrogram))
         self.writer.add_image("spectrogram", ToTensor()(image))
 
-    def _log_audio(self, audio_batch):
+    def _log_audio(self, audio_batch, sample_rate):
         audio = random.choice(audio_batch)
-        self.writer.add_audio("audio", audio)
+        self.writer.add_audio("audio", audio, sample_rate)
 
     @torch.no_grad()
     def get_grad_norm(self, norm_type=2):
