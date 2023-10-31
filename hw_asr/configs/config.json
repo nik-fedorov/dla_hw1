@@ -15,10 +15,11 @@
     "spectrogram": []
   },
   "arch": {
-    "type": "BaselineModel",
+    "type": "DeepSpeech2",
     "args": {
       "n_feats": 128,
-      "fc_hidden": 512
+      "num_rnn_layers": 5,
+      "rnn_hid_size": 512
     }
   },
   "data": {
@@ -27,25 +28,9 @@
       "num_workers": 5,
       "datasets": [
         {
-          "type": "LibrispeechDataset",
+          "type": "LJspeechDataset",
           "args": {
-            "part": "train-clean-100",
-            "max_audio_length": 20.0,
-            "max_text_length": 200
-          }
-        },
-        {
-          "type": "LibrispeechDataset",
-          "args": {
-            "part": "train-clean-360",
-            "max_audio_length": 20.0,
-            "max_text_length": 200
-          }
-        },
-        {
-          "type": "LibrispeechDataset",
-          "args": {
-            "part": "train-other-500",
+            "part": "train",
             "max_audio_length": 20.0,
             "max_text_length": 200
           }
@@ -53,37 +38,15 @@
       ]
     },
     "val": {
-      "batch_size": 30,
+      "batch_size": 50,
       "num_workers": 5,
       "datasets": [
         {
-          "type": "LibrispeechDataset",
+          "type": "LJspeechDataset",
           "args": {
-            "part": "dev-clean"
-          }
-        }
-      ]
-    },
-    "test-other": {
-      "batch_size": 30,
-      "num_workers": 5,
-      "datasets": [
-        {
-          "type": "LibrispeechDataset",
-          "args": {
-            "part": "test-other"
-          }
-        }
-      ]
-    },
-    "test-clean": {
-      "batch_size": 30,
-      "num_workers": 5,
-      "datasets": [
-        {
-          "type": "LibrispeechDataset",
-          "args": {
-            "part": "test-clean"
+            "part": "test",
+            "max_audio_length": 20.0,
+            "max_text_length": 200
           }
         }
       ]
@@ -97,7 +60,9 @@
   },
   "loss": {
     "type": "CTCLoss",
-    "args": {}
+    "args": {
+      "zero_infinity": true
+    }
   },
   "metrics": [
     {
@@ -114,18 +79,16 @@
     }
   ],
   "lr_scheduler": {
-    "type": "OneCycleLR",
+    "type": "StepLR",
     "args": {
-      "steps_per_epoch": 100,
-      "epochs": 50,
-      "anneal_strategy": "cos",
-      "max_lr": 3e-4,
-      "pct_start": 0.2
+      "step_size": 100,
+      "gamma": 0.95
     }
   },
   "trainer": {
     "epochs": 50,
     "len_epoch": 100,
+    "log_step": 100,
 
     "save_dir": "saved/",
     "save_period": 5,
