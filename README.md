@@ -1,82 +1,67 @@
 # ASR project barebones
 
+## Report
+
+About all details about this homework can be found in 
+[wandb report](https://wandb.ai/nik-fedorov/dla_hw1/reports/DLA-ASR-BHW--Vmlldzo1ODM0MTI1?accessToken=fyvk7ky52cqmd8sqvfeddflm1z1no9fdul1as8cqgj2yjke5lf3m1fjte754jpcm). 
+
+## Description
+
+This is a repository containing a convenient pipeline for training automatic speech recognition models. 
+
+Advantages of this repo:
+- possibility of changing experimental configuration by only tuning one json file
+- good and clean code structure (see `hw_asr` folder with all elements of pipeline)
+- prepared scripts for training and evaluation of models
+- prepared downloadable checkpoint with high perfomance on librispeech test sets
+
 ## Installation guide
 
-< Write your installation guide here >
+To set up the environment for this repository run the following command in your terminal (with your virtual environment activated):
 
 ```shell
 pip install -r ./requirements.txt
 ```
 
-## Recommended implementation order
+## Tests
 
-You might be a little intimidated by the number of folders and classes. Try to follow this steps to gradually undestand
-the workflow.
+Make sure all tests work without errors
+```shell
+python -m unittest discover hw_asr/tests
+```
 
-1) Test `hw_asr/tests/test_dataset.py`  and `hw_asr/tests/test_config.py` and make sure everythin works for you
-2) Implement missing functions to fix tests in  `hw_asr\tests\test_text_encoder.py`
-3) Implement missing functions to fix tests in  `hw_asr\tests\test_dataloader.py`
-4) Implement functions in `hw_asr\metric\utils.py`
-5) Implement missing function to run `train.py` with a baseline model
-6) Write your own model and try to overfit it on a single batch
-7) Implement ctc beam search and add metrics to calculate WER and CER over hypothesis obtained from beam search.
-8) ~~Pain and suffering~~ Implement your own models and train them. You've mastered this template when you can tune your
-   experimental setup just by tuning `configs.json` file and running `train.py`
-9) Don't forget to write a report about your work
-10) Get hired by Google the next day
+## Evaluate model
 
-## Before submitting
+To download my best checkpoint run the following:
+```shell
+python default_test_model/download_best_ckpt.py
+```
+if you are interested how I got this checkpoint, you can read about that in 
+[wandb report](https://wandb.ai/nik-fedorov/dla_hw1/reports/DLA-ASR-BHW--Vmlldzo1ODM0MTI1?accessToken=fyvk7ky52cqmd8sqvfeddflm1z1no9fdul1as8cqgj2yjke5lf3m1fjte754jpcm).
 
-0) Make sure your projects run on a new machine after complemeting the installation guide or by 
-   running it in docker container.
-1) Search project for `# TODO: your code here` and implement missing functionality
-2) Make sure all tests work without errors
-   ```shell
-   python -m unittest discover hw_asr/tests
-   ```
-3) Make sure `test.py` works fine and works as expected. You should create files `default_test_config.json` and your
-   installation guide should download your model checpoint and configs in `default_test_model/checkpoint.pth`
-   and `default_test_model/config.json`.
-   ```shell
-   python test.py \
-      -c default_test_config.json \
-      -r default_test_model/checkpoint.pth \
-      -t test_data \
-      -o test_result.json
-   ```
-4) Use `train.py` for training
+You can evaluate model using `test.py` script. Here is an example of command to run my best checkpoint with default test config:
+
+```shell
+python test.py \
+  -c default_test_model/config.json \
+  -r default_test_model/checkpoint.pth \
+  -t test_data \
+  -o test_result.json
+```
+
+## Training
+Use `train.py` for training. Example of command to launch training from scratch:
+```shell
+python train.py -c hw_asr/configs/config_librispeech.json
+```
+
+To fine-tune your checkpoint you can use option `-r` to pass path to the checkpoint file:
+```shell
+python train.py \
+  -c hw_asr/configs/config_librispeech.json \
+  -r saved/models/<exp name>/<run name>/checkpoint.pth
+```
 
 ## Credits
 
-This repository is based on a heavily modified fork
-of [pytorch-template](https://github.com/victoresque/pytorch-template) repository.
-
-## Docker
-
-You can use this project with docker. Quick start:
-
-```bash 
-docker build -t my_hw_asr_image . 
-docker run \
-   --gpus '"device=0"' \
-   -it --rm \
-   -v /path/to/local/storage/dir:/repos/asr_project_template/data/datasets \
-   -e WANDB_API_KEY=<your_wandb_api_key> \
-	my_hw_asr_image python -m unittest 
-```
-
-Notes:
-
-* `-v /out/of/container/path:/inside/container/path` -- bind mount a path, so you wouldn't have to download datasets at
-  the start of every docker run.
-* `-e WANDB_API_KEY=<your_wandb_api_key>` -- set envvar for wandb (if you want to use it). You can find your API key
-  here: https://wandb.ai/authorize
-
-## TODO
-
-These barebones can use more tests. We highly encourage students to create pull requests to add more tests / new
-functionality. Current demands:
-
-* Tests for beam search
-* README section to describe folders
-* Notebook to show how to work with `ConfigParser` and `config_parser.init_obj(...)`
+This repository is based on a [asr_project_template](https://github.com/WrathOfGrapes/asr_project_template) repository.
