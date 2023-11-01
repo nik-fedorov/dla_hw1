@@ -4,6 +4,7 @@ from typing import List, NamedTuple
 import torch
 
 from .char_text_encoder import CharTextEncoder
+from .lm import LM
 
 
 class Hypothesis(NamedTuple):
@@ -14,12 +15,17 @@ class Hypothesis(NamedTuple):
 class CTCCharTextEncoder(CharTextEncoder):
     EMPTY_TOK = "^"
 
-    def __init__(self, alphabet: List[str] = None):
+    def __init__(self, alphabet: List[str] = None, use_lm=False):
         super().__init__(alphabet)
         vocab = [self.EMPTY_TOK] + list(self.alphabet)
         self.ind2char = dict(enumerate(vocab))
         self.char2ind = {v: k for k, v in self.ind2char.items()}
         self.empty_ind = self.char2ind[self.EMPTY_TOK]
+
+        if use_lm:
+            self.lm = LM([''] + list(self.alphabet))
+        else:
+            self.lm = None
 
     def ctc_decode(self, inds: List[int]) -> str:
         res_tokens = []
@@ -66,3 +72,8 @@ class CTCCharTextEncoder(CharTextEncoder):
 
         hypos = [Hypothesis(hypo, prob) for hypo, prob in final_hypos_dict.items()]
         return sorted(hypos, key=lambda x: x.prob, reverse=True)
+
+    def ctc_beam_search_with_lm(self, logits: torch.Tensor, probs_length, beam_size: int = 10):
+        if self.lm is None:
+            raise RuntimeError("LM is not initialized in text encoder, but beam search with LM is invoked")
+        return self.lm.decode(logits, probs_length, beam_size)

@@ -26,7 +26,7 @@
         {
           "type": "LibrispeechDataset",
           "args": {
-            "part": "test-clean"
+            "part": "test-other"
           }
         }
       ]
@@ -48,11 +48,16 @@
     {
       "type": "BeamSearchWERMetric",
       "args": {
-        "name": "WER (beam search)",
-        "beam_size": 3
+        "name": "WER (beam search with lm)",
+        "beam_size": 5000,
+        "use_lm": true
       }
     }
   ],
+  "text_encoder": {
+    "type": "CTCCharTextEncoder",
+    "args": {"use_lm": true}
+  },
   "trainer": {
     "save_dir": "saved/"
   }
